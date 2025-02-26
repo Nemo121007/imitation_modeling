@@ -1,0 +1,31 @@
+---
+title: "hint"
+output: html_document
+---
+
+# № 1_2
+Расчёт коэфициента корреляции с помощью оценки ковариации
+\[
+r_{X_i, X_j} = \frac{\operatorname{cov}(X_i, X_j)}{\sqrt{\operatorname{var}(X_i) \cdot \operatorname{var}(X_j)}}
+\]
+
+Вычисление t-статистики:
+\[
+t = \frac{r_{\text{direct}} - r_{\text{via\_cov}}}{\sqrt{\frac{1 - r_{\text{direct}}^2}{n - 2}}}
+\]
+
+Число степеней свободы:
+\[
+df = n - 2
+\]
+
+Вычисление p-значения (двусторонний тест):
+\[
+p\text{-value} = 2 \cdot \left(1 - P_T\left(|t|, df\right)\right)
+\]
+
+где \( P_T(t, df) \) — это функция распределения **t-статистики** (CDF t-распределения).
+
+# №2
+Метод знака площади параллелограма для определения попадения точки в треугольник
+

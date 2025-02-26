@@ -1,0 +1,27 @@
+library(ggplot2)
+library(plotly)
+
+# Количество точек
+n_points <- 5000
+
+# Генерация случайных точек с равномерной плотностью на поверхности
+u <- sqrt(runif(n_points)) * 2 * pi # sqrt() для равномерного распределения по площади
+v <- runif(n_points, 0, 2 * pi)
+
+# Преобразование в декартовы координаты
+x <- u * cos(v)
+y <- u * sin(v)
+z <- v
+
+data <- data.frame(x, y, z)
+
+# Визуализация геликоида
+p <- plot_ly(
+  data = data,
+  x = ~x, y = ~y, z = ~z,
+  type = "scatter3d",
+  mode = "markers",
+  marker = list(size = 2, color = data$z, colorscale = "Viridis")
+)
+
+p
