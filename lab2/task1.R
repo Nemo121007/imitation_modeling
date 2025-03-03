@@ -11,6 +11,8 @@ N_sim <- 10000  # Число симуляций
 lambda_mal <- rep(1, n)        # λ для злокачественных клеток
 lambda_healthy <- rep(1, m)  # λ для здоровых клеток
 
+
+
 # **Прямой метод Монте-Карло**
 indicator_direct <- numeric(N_sim)
 for (i in 1:N_sim) {
@@ -29,19 +31,21 @@ p_hat_direct <- mean(indicator_direct)
 # Дисперсия оценки
 var_direct <- var(indicator_direct) / N_sim
 
+
+
 # **Условный метод Монте-Карло**
 # Генерируем времена гибели здоровых клеток для всех симуляций
 T_healthy_matrix <- matrix(rexp(N_sim * m, rate = lambda_healthy), nrow = N_sim)
 # Находим T^{(k)} для каждой симуляции
 T_k_vec <- apply(T_healthy_matrix, 1, function(x) sort(x, decreasing = TRUE)[k])
 # Вычисляем Z = P(M < T^{(k)} | T^{(k)})
-# M ~ Exp(sum(lambda_mal)), так как M = max(T_i), а T_i независимы
 lambda_M <- sum(lambda_mal)
-Z <- 1 - exp(-lambda_M * T_k_vec)  # CDF экспоненциального распределения
+Z <- sapply(T_k_vec, function(t) prod(1 - exp(-lambda_mal * t)))
 # Оценка вероятности
 p_hat_conditional <- mean(Z)
 # Дисперсия оценки
 var_conditional <- var(Z) / N_sim
+
 
 # Вывод результатов
 list(
