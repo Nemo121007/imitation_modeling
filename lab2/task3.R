@@ -1,5 +1,5 @@
 # Параметры для рулетки
-Wp <- 0.001  # порог веса
+Wp <- 0.0001  # порог веса
 m <- 10      # коэффициент для рулетки
 
 matrix_size <- 100  # Количество интервалов по каждой оси
@@ -18,13 +18,13 @@ layers <- data.frame(
 mu_a_sphere <- 51
 mu_s_sphere <- 186
 g_sphere <- 0.8
-l <- 0.1     # Глубина центра шара, см
-r <- 0.05    # Радиус шара, см
+l <- 0.02     # Глубина центра шара, см
+r <- 0.01    # Радиус шара, см
 
 # Вычисляем границы слоёв по оси Z
 layers$z_start <- c(0, head(cumsum(layers$d), -1))
 layers$z_end   <- cumsum(layers$d)
-max_depth <- 0.21
+max_depth <- 0.2
 
 
 
@@ -71,18 +71,21 @@ get_layer_params <- function(z, layers) {
 # Функция для генерации угла рассеяния по Хени-Гринштейну
 sample_scattering <- function(g) {
   xi <- runif(1)
-  if(abs(g) < 1e-6) {
-    cos_theta <- 2*xi - 1
+  if (abs(g) < 1e-6) {
+    # Для g, близкого к нулю, фазовая функция становится равномерной
+    cos_theta <- 2 * xi - 1
   } else {
-    temp <- (1 - g^2) / (1 - g + 2*g*xi)
-    cos_theta <- (1 + g^2 - temp^2) / (2*g)
-    # Ограничим случайные вычисления, если возникают погрешности
-    cos_theta <- max(min(cos_theta, 1), -1)
+    term <- (1 - g^2) / (1 - g + 2 * g * xi)
+    cos_theta <- (1 + g^2 - term^2) / (2 * g)
+    # Ограничиваем значения, чтобы гарантировать, что cos_theta ∈ [-1, 1]
+    # cos_theta <- max(min(cos_theta, 1), -1)
   }
   sin_theta <- sqrt(1 - cos_theta^2)
-  phi <- runif(1, 0, 2*pi)
+  phi <- runif(1, 0, 2 * pi)
+  
   return(list(cos_theta = cos_theta, sin_theta = sin_theta, phi = phi))
 }
+
 
 
 
@@ -143,6 +146,14 @@ simulate_photon <- function(layers, Wp, m, l, r) {
     
     mu   <- mu_a + mu_s
     
+    # Вероятность поглощения
+    a1 = runif(1)
+    a2 = mu_a / mu
+    if (a1 <=  mu_a / mu) {
+      absorbed_energy[[length(absorbed_energy) + 1]] <- list(x = pos["x"], z = pos["z"], dW = W)
+      return(list(status = "absorbed", absorption = absorbed_energy))
+    }
+    
     s <- rexp(1, rate = mu)
     pos_new <- pos + s * u
     pos <- pos_new
@@ -158,9 +169,10 @@ simulate_photon <- function(layers, Wp, m, l, r) {
     absorbed_energy[[length(absorbed_energy) + 1]] <- list(x = pos["x"], z = pos["z"], dW = dW)
     
     if(W < Wp) {
-      if(runif(1) < 1/m) {
+      if(runif(1) <= 1/m) {
         W <- m * W
       } else {
+        absorbed_energy[[length(absorbed_energy) + 1]] <- list(x = pos["x"], z = pos["z"], dW = W)
         return(list(status = "absorbed", absorption = absorbed_energy))
       }
     }
@@ -174,7 +186,7 @@ simulate_photon <- function(layers, Wp, m, l, r) {
 
 
 # Основной цикл симуляции
-set.seed(42)
+# set.seed(42)
 n_photons <- 10000
 n_absorbed <- 0
 n_reflected <- 0
