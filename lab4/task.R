@@ -7,7 +7,7 @@ alpha <- 0.6
 P0 <- 90
 beta <- 3
 delta <- 1.5
-sigma <- 1  # Предположение, так как не указано
+sigma <- 1  # Предположение среднеквадратичного отклонения
 N <- 1000   # Количество частиц
 
 # Определение системных матриц
@@ -95,7 +95,6 @@ for (n in 1:T) {
   
   # Обновление весов
   y_n <- as.numeric(rssi_data[n, ])  # Вектор RSSI для текущего временного шага (длина 6)
-  y_n <- as.numeric(rssi_data[n, ])
   log_weights <- compute_likelihood(x_particles, y_n, stations)
   max_log <- max(log_weights)
   weights <- exp(log_weights - max_log)  # Для численной стабильности
